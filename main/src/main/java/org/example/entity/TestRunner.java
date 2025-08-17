@@ -92,12 +92,6 @@ public class TestRunner {
             });
 
             tests.sort((el1, el2) -> {
-                int testPriority1 = el1.getAnnotation(org.example.anotations.Test.class).priority();
-                int testPriority2 = el2.getAnnotation(org.example.anotations.Test.class).priority();
-                int comparePriority = Integer.compare(testPriority1, testPriority2);
-                if (comparePriority != 0) {
-                    return -1 * comparePriority;
-                }
                 Order testOrderAnnotation1 = el1.getAnnotation(org.example.anotations.Order.class);
                 Order testOrderAnnotation2 = el2.getAnnotation(org.example.anotations.Order.class);
                 int testOrder1 = testOrderAnnotation1 == null ? 5 : testOrderAnnotation1.value();
@@ -105,6 +99,12 @@ public class TestRunner {
                 int compareOrder = Integer.compare(testOrder1, testOrder2);
                 if (compareOrder != 0) {
                     return compareOrder;
+                }
+                int testPriority1 = el1.getAnnotation(org.example.anotations.Test.class).priority();
+                int testPriority2 = el2.getAnnotation(org.example.anotations.Test.class).priority();
+                int comparePriority = Integer.compare(testPriority1, testPriority2);
+                if (comparePriority != 0) {
+                    return -1 * comparePriority;
                 }
                 return getNameTest(el1).compareTo(getNameTest(el2));
             });

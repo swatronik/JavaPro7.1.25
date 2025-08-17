@@ -31,7 +31,7 @@ public class TestExample {
     }
 
     @Test("Успешный тест")
-    private void testSuccess() {
+    public void testSuccess() {
         System.out.println("Успешный тест");
         Assert.isTrue(true);
     }

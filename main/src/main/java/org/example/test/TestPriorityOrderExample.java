@@ -39,49 +39,49 @@ public class TestPriorityOrderExample {
     }
 
     @Test
-    @Order(2)
+    @Order(6)
     public void testOrderB() {
         System.out.println("Тест на порядок (должен быть 1)");
         Assert.isTrue(true);;
     }
 
     @Test
-    @Order(6)
+    @Order(7)
     public void testOrderC() {
         System.out.println("Тест на порядок (должен быть 2)");
         Assert.isTrue(true);;
     }
 
     @Test
-    @Order(6)
+    @Order(7)
     public void testOrderD() {
         System.out.println("Тест на порядок (должен быть 3)");
         Assert.isTrue(true);;
     }
 
     @Test(priority = 9)
-    @Order(6)
+    @Order(2)
     public void testPriorityOrderA() {
         System.out.println("Тест на приоритет и порядок (должен быть 1)");
         Assert.isTrue(true);;
     }
 
     @Test(priority = 8)
-    @Order(4)
+    @Order(3)
     public void testPriorityOrderB() {
         System.out.println("Тест на приоритет и порядок (должен быть 2)");
         Assert.isTrue(true);;
     }
 
     @Test(priority = 8)
-    @Order(6)
+    @Order(4)
     public void testPriorityOrderC() {
         System.out.println("Тест на приоритет и порядок (должен быть 3)");
         Assert.isTrue(true);;
     }
 
     @Test(priority = 8)
-    @Order(6)
+    @Order(4)
     public void testPriorityOrderD() {
         System.out.println("Тест на приоритет и порядок (должен быть 4)");
         Assert.isTrue(true);;
