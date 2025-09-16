@@ -1,7 +1,8 @@
 package org.example.service;
 
-import org.example.dao.UserDao;
+import org.example.repository.UserRepository;
 import org.example.entity.User;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -9,29 +10,30 @@ import java.util.List;
 @Service
 public class UserService {
 
-    private final UserDao userDao;
+    @Autowired
+    private UserRepository repository;
 
-    public UserService(UserDao userDao) {
-        this.userDao = userDao;
+    public UserService() {
     }
 
+
     public List<User> getAllUsers() {
-        return userDao.getAllUsers();
+        return repository.findAll();
     }
 
     public User getUser(Long id) {
-        return userDao.getUser(id);
+        return repository.findById(id).orElse(null);
     }
 
     public Long insertUser(String username) {
-        return userDao.insertUser(username);
+        return repository.save(new User(username)).getId();
     }
 
     public void updateUser(Long id, String username) {
-        userDao.updateUser(id, username);
+        repository.save(new User(id, username));
     }
 
     public void deleteUser(Long id) {
-        userDao.deleteUser(id);
+        repository.deleteById(id);
     }
 }
