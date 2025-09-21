@@ -1,0 +1,48 @@
+version: '3'
+services:
+
+  db:
+    image: postgres:17.6
+    container_name: 'postgres'
+    environment:
+      - POSTGRES_DB=postgres
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - PGDATA=/var/lib/postgresql/data/pgdata
+      - TZ='GMT+3'
+      - PGTZ='GMT+3'
+    networks:
+      - gateway
+    restart: always
+    ports:
+      - '5432:5432'
+    volumes:
+      - postgresdb:/var/lib/postgresql/data
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U postgres" ]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  app:
+    image: 'docker-spring-boot-postgres:latest'
+    hostname: app
+    build:
+      context: '.'
+      dockerfile: 'Dockerfile'
+    container_name: 'app'
+    networks:
+      - gateway
+    ports:
+      - '8080:8080'
+    depends_on:
+      db:
+        condition: service_healthy
+    links:
+      - db
+
+volumes:
+  postgresdb:
+
+networks:
+  gateway: {}
