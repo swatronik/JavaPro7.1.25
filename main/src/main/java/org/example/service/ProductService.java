@@ -1,6 +1,8 @@
 package org.example.service;
 
+import jakarta.transaction.Transactional;
 import org.example.entity.Product;
+import org.example.exception.NotEnoughMoney;
 import org.example.repository.ProductRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -30,5 +32,17 @@ public class ProductService {
 
     public void deleteProduct(Long id) {
         repository.deleteById(id);
+    }
+
+    @Transactional
+    public Double changeBalanceAccount(Long id, Double deltaBalance) {
+        Product product = getProduct(id);
+        Double balance = product.getBalance();
+        if (deltaBalance < 0 && balance + deltaBalance < 0) {
+            throw new NotEnoughMoney(balance, deltaBalance);
+        }
+        product.setBalance(balance + deltaBalance);
+        repository.save(product);
+        return getProduct(id).getBalance();
     }
 }
