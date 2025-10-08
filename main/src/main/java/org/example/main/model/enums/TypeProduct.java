@@ -1,0 +1,16 @@
+package org.example.main.model.enums;
+
+public enum TypeProduct {
+    ACCOUNT("Счет"),
+    CARD("Карта");
+
+    private final String description;
+
+    TypeProduct(String description) {
+        this.description = description;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+}

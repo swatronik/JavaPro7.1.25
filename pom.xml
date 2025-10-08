@@ -12,6 +12,7 @@
     <modules>
         <module>main</module>
         <module>payment</module>
+        <module>payment_limit</module>
     </modules>
 
     <properties>
