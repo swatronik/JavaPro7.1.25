@@ -16,13 +16,10 @@ services:
       - zookeeper
     ports:
       - "9092:9092"
-      - "9093:9093"  # Добавляем второй порт для внутренней сети Docker
+      - "9093:9093"
     environment:
       KAFKA_BROKER_ID: 1
       KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
-      # ДВА РАЗНЫХ LISTENER'а:
-      # - PLAINTEXT_HOST для подключения с хоста (Java приложения)
-      # - PLAINTEXT_DOCKER для подключения из Docker сети (Kafka UI)
       KAFKA_ADVERTISED_LISTENERS: PLAINTEXT_HOST://localhost:9092,PLAINTEXT_DOCKER://kafka:9093
       KAFKA_LISTENERS: PLAINTEXT_HOST://0.0.0.0:9092,PLAINTEXT_DOCKER://0.0.0.0:9093
       KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT_HOST:PLAINTEXT,PLAINTEXT_DOCKER:PLAINTEXT
@@ -39,5 +36,4 @@ services:
       - "8096:8080"
     environment:
       KAFKA_CLUSTERS_0_NAME: local
-      # Kafka UI использует внутренний адрес Docker сети
       KAFKA_CLUSTERS_0_BOOTSTRAP_SERVERS: kafka:9093

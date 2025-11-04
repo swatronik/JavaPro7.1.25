@@ -13,7 +13,6 @@ public class KafkaConsumer {
     private static final String GROUP_ID = "fruit-consumer-group";
 
     public static void main(String[] args) {
-        // Настройки Consumer
         Properties properties = new Properties();
         properties.setProperty(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, BOOTSTRAP_SERVERS);
         properties.setProperty(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class.getName());

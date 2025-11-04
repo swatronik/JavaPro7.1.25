@@ -17,13 +17,10 @@ public class KafkaProducer {
     );
 
     public static void main(String[] args) {
-        // Настройки Producer
         Properties properties = new Properties();
         properties.setProperty(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, BOOTSTRAP_SERVERS);
         properties.setProperty(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class.getName());
         properties.setProperty(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, StringSerializer.class.getName());
-
-        // Дополнительные настройки для надежности
         properties.setProperty(ProducerConfig.ACKS_CONFIG, "all");
         properties.setProperty(ProducerConfig.ENABLE_IDEMPOTENCE_CONFIG, "true");
 
@@ -46,7 +43,6 @@ public class KafkaProducer {
                     }
                 });
 
-                // Задержка между сообщениями
                 Thread.sleep(1000);
             }
 
