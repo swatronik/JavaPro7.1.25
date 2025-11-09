@@ -1,0 +1,26 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nginx-deployment
+spec:
+  replicas: 1  # Желаемое количество реплик
+  selector:    # Селектор для поиска управляемых Pod'ов
+    matchLabels:
+      app: nginx
+      component: web
+  template:    # Шаблон для создания Pod'ов
+    metadata:
+      labels:  # Метки должны совпадать с селектором
+        app: nginx
+        component: web
+    spec:
+      containers:
+        - name: nginx
+          image: nginx:1.23
+          ports:
+            - containerPort: 80
+  strategy:    # Стратегия обновления
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1        # Максимум на 1 Pod больше желаемого количества
+      maxUnavailable: 0   # Ни одного недоступного Pod'а во время обновления
