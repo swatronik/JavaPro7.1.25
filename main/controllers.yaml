@@ -1,0 +1,122 @@
+# 1. ConfigMap
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: app-config
+data:
+  APP_MODE: "dev"
+  APP_COLOR: "blue"
+---
+# 2. Secret
+apiVersion: v1
+kind: Secret
+metadata:
+  name: db-secret
+type: Opaque
+data:
+  DB_USER: ZGVtbw==
+  DB_PASS: c2VjcmV0MTIz
+---
+# 3. PVC
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: logs-pvc
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 1Gi
+---
+# 4. Nginx ConfigMap
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: nginx-config
+data:
+  default.conf: |
+    server {
+        listen 80;
+        server_name _;
+        location / {
+            root /usr/share/nginx/html;
+            index index.html;
+        }
+    }
+---
+# 5. Deployment
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: demo-web
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: demo-web
+  template:
+    metadata:
+      labels:
+        app: demo-web
+    spec:
+      containers:
+        - name: nginx
+          image: nginx:1.23
+          ports:
+            - containerPort: 80
+          volumeMounts:
+            - name: html-volume
+              mountPath: /usr/share/nginx/html
+            - name: config-volume
+              mountPath: /etc/nginx/conf.d
+        - name: writer
+          image: busybox:1.36
+          command: ["sh", "-c", 'while true; do echo "<html><body><h1>Demo Web App</h1><p>Color: $APP_COLOR</p><p>Server: $(hostname)</p><p>Time: $(date)</p></body></html>" > /data/index.html; sleep 10; done']
+          env:
+            - name: APP_COLOR
+              valueFrom:
+                configMapKeyRef:
+                  name: app-config
+                  key: APP_COLOR
+          volumeMounts:
+            - name: html-volume
+              mountPath: /data
+      volumes:
+        - name: html-volume
+          persistentVolumeClaim:
+            claimName: logs-pvc
+        - name: config-volume
+          configMap:
+            name: nginx-config
+---
+# 6. Service
+apiVersion: v1
+kind: Service
+metadata:
+  name: demo-service
+spec:
+  selector:
+    app: demo-web
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 80
+---
+# 7. Ingress
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: demo-ingress
+spec:
+  rules:
+    - host: demo.localtest.me
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: demo-service
+                port:
+                  number: 80
