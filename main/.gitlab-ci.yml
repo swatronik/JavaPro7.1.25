@@ -1,0 +1,124 @@
+# Общие переменные
+variables:
+  LOG_FILE_NAME: "log.txt"
+
+# Стадии пайплайна
+stages:
+  - stage_build
+  - stage_test
+  - stage_deploy_dev
+  - stage_deploy_prd
+
+# 1. Build Job
+build_job:
+  stage: stage_build
+  script:
+    - echo "=== Build Started ===" | tee "${LOG_FILE_NAME}"
+    - echo "Building application..." | tee -a "${LOG_FILE_NAME}"
+    - echo "Build artifacts created" | tee -a "${LOG_FILE_NAME}"
+    - echo "=== Build Completed ===" | tee -a "${LOG_FILE_NAME}"
+    - echo "========= BUILD LOG ========="
+    - wc -c "${LOG_FILE_NAME}" | awk '{print "size(bytes):",$1}'
+    - cat -n "${LOG_FILE_NAME}"
+  artifacts:
+    paths:
+      - "${LOG_FILE_NAME}"
+    expire_in: 1 hour
+
+# 2. Test Jobs (цепочка)
+test_job1:
+  stage: stage_test
+  script:
+    - test -f "${LOG_FILE_NAME}"
+    - echo "=== Test 1 Started ===" | tee -a "${LOG_FILE_NAME}"
+    - echo "Running unit tests..." | tee -a "${LOG_FILE_NAME}"
+    - echo "All unit tests passed" | tee -a "${LOG_FILE_NAME}"
+    - echo "=== Test 1 Completed ===" | tee -a "${LOG_FILE_NAME}"
+    - echo "========= TEST 1 LOG ========="
+    - wc -c "${LOG_FILE_NAME}" | awk '{print "size(bytes):",$1}'
+    - cat -n "${LOG_FILE_NAME}"
+  artifacts:
+    paths:
+      - "${LOG_FILE_NAME}"
+    expire_in: 1 hour
+
+test_job2:
+  stage: stage_test
+  dependencies:
+    - test_job1
+  script:
+    - test -f "${LOG_FILE_NAME}"
+    - echo "=== Test 2 Started ===" | tee -a "${LOG_FILE_NAME}"
+    - echo "Running integration tests..." | tee -a "${LOG_FILE_NAME}"
+    - echo "All integration tests passed" | tee -a "${LOG_FILE_NAME}"
+    - echo "=== Test 2 Completed ===" | tee -a "${LOG_FILE_NAME}"
+    - echo "========= TEST 2 LOG ========="
+    - wc -c "${LOG_FILE_NAME}" | awk '{print "size(bytes):",$1}'
+    - cat -n "${LOG_FILE_NAME}"
+  artifacts:
+    paths:
+      - "${LOG_FILE_NAME}"
+    expire_in: 1 hour
+
+test_job3:
+  stage: stage_test
+  dependencies:
+    - test_job2
+  script:
+    - test -f "${LOG_FILE_NAME}"
+    - echo "=== Test 3 Started ===" | tee -a "${LOG_FILE_NAME}"
+    - echo "Running e2e tests..." | tee -a "${LOG_FILE_NAME}"
+    - echo "All e2e tests passed" | tee -a "${LOG_FILE_NAME}"
+    - echo "=== Test 3 Completed ===" | tee -a "${LOG_FILE_NAME}"
+    - echo "========= TEST 3 LOG ========="
+    - wc -c "${LOG_FILE_NAME}" | awk '{print "size(bytes):",$1}'
+    - cat -n "${LOG_FILE_NAME}"
+  artifacts:
+    paths:
+      - "${LOG_FILE_NAME}"
+    expire_in: 1 hour
+
+# 3. Deploy to Dev (автоматический)
+deploy_to_dev_job:
+  stage: stage_deploy_dev
+  dependencies:
+    - test_job3
+  script:
+    - test -f "${LOG_FILE_NAME}"
+    - echo "---Deploy to DEV Started---" | tee -a "${LOG_FILE_NAME}"
+    - echo "Deploying to DEV..." | tee -a "${LOG_FILE_NAME}"
+    - echo "DEV deployment completed successfully" | tee -a "${LOG_FILE_NAME}"
+    - echo "---Deploy to DEV Completed---" | tee -a "${LOG_FILE_NAME}"
+    - echo "========= MERGED LOG (DEV) ========="
+    - wc -c "${LOG_FILE_NAME}" | awk '{print "size(bytes):",$1}'
+    - cat -n "${LOG_FILE_NAME}"
+  artifacts:
+    paths:
+      - "${LOG_FILE_NAME}"
+    expire_in: 1 hour
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "main" || $CI_COMMIT_BRANCH == "develop"'
+
+# 4. Deploy to Prod (ручной)
+deploy_to_prd_job:
+  stage: stage_deploy_prd
+  dependencies:
+    - deploy_to_dev_job
+  script:
+    - test -f "${LOG_FILE_NAME}"
+    - echo "---Deploy to PRD Started---" | tee -a "${LOG_FILE_NAME}"
+    - echo "Deploying to PRODUCTION..." | tee -a "${LOG_FILE_NAME}"
+    - echo "PRODUCTION deployment completed successfully" | tee -a "${LOG_FILE_NAME}"
+    - echo "---Deploy to PRD Completed---" | tee -a "${LOG_FILE_NAME}"
+    - echo "========= FINAL LOG (PRD) ========="
+    - wc -c "${LOG_FILE_NAME}" | awk '{print "size(bytes):",$1}'
+    - cat -n "${LOG_FILE_NAME}"
+  artifacts:
+    paths:
+      - "${LOG_FILE_NAME}"
+    expire_in: 1 hour
+  resource_group: production
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "Task2-7"'
+      when: manual
+      allow_failure: false
